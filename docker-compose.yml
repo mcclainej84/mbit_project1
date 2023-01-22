@@ -7,23 +7,17 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: pictures
-      
       MYSQL_USER: mbit
-      
       MYSQL_PASSWORD: mbit
-      
       MYSQL_ROOT_PASSWORD: root
       
 #      This is to expose the DB port in order to query
 #    ports:
 #        - "3366:3306"
     volumes:
-      - mysql-db:/var/lib/mysql
-      - type: bind
-        source: ./create_tables.sql
-        target: /tmp/create_tables.sql
-    command: mysqld --init-file="/tmp/create_tables.sql" 
-    
+      - './create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql'
+      - './mysql-db:/var/lib/mysql'
+
   webserver:
     image: python:3.11
     ports:
@@ -48,4 +42,4 @@ services:
     
 # Names our volume
 volumes:
-  mysql-db:
+  mysql-db:    
