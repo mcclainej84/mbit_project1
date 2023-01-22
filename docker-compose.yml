@@ -1,0 +1,51 @@
+version: '1.0'
+
+
+services:
+  db_pictures:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: pictures
+      
+      MYSQL_USER: mbit
+      
+      MYSQL_PASSWORD: mbit
+      
+      MYSQL_ROOT_PASSWORD: root
+      
+#      This is to expose the DB port in order to query
+#    ports:
+#        - "3366:3306"
+    volumes:
+      - mysql-db:/var/lib/mysql
+      - type: bind
+        source: ./create_tables.sql
+        target: /tmp/create_tables.sql
+    command: mysqld --init-file="/tmp/create_tables.sql" 
+    
+  webserver:
+    image: python:3.11
+    ports:
+      - "80:80"
+
+    volumes:
+      - type: bind
+        source: ./app/Project
+        target: /home/app/project
+        
+    command:        
+        - sh
+        - -c
+        - |
+          pip install -r /home/app/project/requirements.txt
+          waitress-serve --port 80  --call 'project:create_app'
+          #python -m test_api
+          
+    working_dir: /home/app/
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t    
+    
+# Names our volume
+volumes:
+  mysql-db:
